@@ -2,6 +2,20 @@
 
 This records executed checks, not a guarantee that every bug is absent. No external Windows/Linux preview test service was used.
 
+## Published alpha.5 verification
+
+[v0.1.0-alpha.5](https://github.com/ItzGlace/PrismaLink/releases/tag/v0.1.0-alpha.5) was published from source commit `8be50f3687fada2e5d5754f54b6f0f2b9eb19473`. This completed record supersedes the outstanding items in the earlier build history below.
+
+- Local checks passed: 17 Vitest tests, 3 Rust core tests, and 14 Playwright tests, including the page-scroll navigation regression. Responsive layouts and axe accessibility scans passed at the recorded widths.
+- [Native source/desktop run 44763951980](https://github.com/ItzGlace/PrismaLink/actions/runs/44763951980): source checks passed; both Ubuntu 24.04 x64 and Windows Server 2022 x64 package builds and native install/render/uninstall checks passed. That run's separate Android job failed its missing-CI-secret preflight; its publish job was skipped. The independent owner-signed workflow below completed Android validation and publication.
+- [Owner-signed publication run 44764941417](https://github.com/ItzGlace/PrismaLink/actions/runs/44764941417) passed both verification and publication. The universal production-signed APK installed on an API 35 Google APIs x86_64 emulator; real WebView vault creation, persistence across process restart, unlock, and uninstall passed. Android minimum API is 24; the APK includes arm64-v8a, armeabi-v7a, and x86_64. ZIP and native ELF 16 KiB alignment checks passed.
+- The APK certificate SHA-256 is `8C:66:3E:BF:C2:4B:31:9E:F0:DD:E6:C5:23:73:39:97:E1:64:0F:18:96:BB:FE:6F:B3:4F:18:16:A3:53:2D:8D`, matching the owner's supplied identity. Signing occurred locally; no private signing files were committed or published.
+- All 16 public release assets were downloaded again in this cloud workspace. Every entry in `SHA256SUMS` and every provenance size/hash matched; the downloaded APK passed signature, source/version, ZIP, ABI machine-type and 16 KiB alignment verification. The published exact-tag source archive contains none of the uploaded signing files.
+
+Windows remains unsigned. Windows 10/11 hardware, physical Android devices (including 16 KiB-page devices), and Fedora/AlmaLinux or other Linux distributions were not tested. SSH/SFTP/VNC/RDP/NFC engines remain deferred. These checks do not establish that all possible visual or backend bugs are absent.
+
+## Earlier build history
+
 ## Passed in this cloud machine
 
 - Production TypeScript/Vite build, including strict unused-variable checking.
