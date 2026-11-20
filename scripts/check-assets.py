@@ -16,6 +16,6 @@ for p in files:
             assert z.testzip() is None
             assert 'AndroidManifest.xml' in z.namelist()
             abis={n.split('/')[1] for n in z.namelist() if n.startswith('lib/') and n.endswith('.so')}
-            assert {'arm64-v8a','armeabi-v7a','x86_64'} <= abis, abis
+            assert {'arm64-v8a','armeabi-v7a','x86_64'} == abis, abis
 assert all(required.values()), f'Missing release targets: {required}'
 print(f'Validated {len(files)} native package assets.')

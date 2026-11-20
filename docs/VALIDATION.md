@@ -14,15 +14,15 @@ This records executed checks, not a guarantee that every bug is absent. No exter
 - `npm audit`: **zero vulnerabilities** after upgrading test/build tooling and removing an obsolete license generator.
 - Verified upstream Gradle wrapper and distribution SHA-256; wrapper checksum is saved in the Android project.
 - Linux x64 optimized binary compilation; `.deb` and `.rpm` package generation and Debian control metadata inspection. The initial Debian package is named `prisma-link` and includes GTK/WebKit dependencies.
-- Android arm64 native Rust library cross-compilation with NDK 27.2.12479018.
+- Android native Rust cross-compilation for arm64-v8a, armeabi-v7a and x86_64 with NDK 27.2.12479018; universal APK ZIP integrity, exact ABI set, package/version and minimum API 24 inspection. The release APK is unsigned: signature verification correctly fails (no production-signing claim). ELF machine types match all three ABI labels; the final APK includes 808 Rust-license entries.
 
 ## Outstanding platform validation
 
-Native Linux startup initially failed because this machine has WebKit in a workspace sysroot, while WebKit expects helper processes at distribution installation paths. Local packaging and runtime diagnosis are ongoing; a compiled binary is not evidence of successful native UI behavior. AppImage packaging initially failed in linuxdeploy; do not distribute an unvalidated portable image.
+Native Linux startup initially failed because this machine has WebKit in a workspace sysroot, while WebKit expects helper processes at distribution installation paths. A helper-path virtualization attempt produced a blank native window, so native UI behavior is not validated. AppImage packaging initially failed in linuxdeploy; clearing the sysroot prefix for bundle-only packaging corrected the GTK path issue, and an approximately 104 MB AppImage was generated. Final local artifacts are approximately 3.3 MiB (Debian), 3.4 MiB (RPM), and 103.8 MiB (AppImage), including original dependency notices. AppImage extraction verified the embedded ELF and Rust-license metadata. These are development build artifacts; installation and UI behavior must be verified on standard platform runners before release.
 
-Android universal APK assembly, signature/ABI verification, and device/emulator installation are not yet established. Only arm64 native compilation is currently confirmed. No release keystore is present in the local machine. GitHub Actions secret metadata cannot be inspected while the GitHub API is blocked.
+Android universal APK assembly and ABI/minimum-version checks passed. Device/emulator installation and signed-release verification remain unrun; there is no /dev/kvm or configured local emulator/device. The local APK is an unsigned approximately 21 MiB build, not an installable production package. No release keystore is present in the local machine. GitHub Actions secret metadata cannot be inspected while the GitHub API is blocked.
 
-Windows installer generation/install/launch/uninstall has not run here. The workflow provides Windows runner checks but their results must be inspected after execution. Fedora/AlmaLinux RPM installation and other representative Linux distributions are untested. No 60 fps or comprehensive native accessibility claim is made.
+Windows installer generation/install/launch/uninstall has not run here. The workflow provides Windows OS-accessibility render checks, Linux AT-SPI render/navigation checks and Android emulator vault create/restart/unlock checks. These native scripts do not use a preview service; their platform-runner results must be inspected after execution. Fedora/AlmaLinux RPM installation and other representative Linux distributions are untested. No 60 fps or comprehensive native accessibility claim is made.
 
 ## Release status
 

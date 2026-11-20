@@ -10,3 +10,7 @@ PrismaLink original source and application icon are MIT licensed. Dependencies r
 - GTK/WebKitGTK and system libraries are provided by the Linux distribution. Redistribution in portable packages must preserve applicable LGPL and other notices. WebView2 is supplied through Microsoft's official runtime installer under Microsoft's terms. Android SDK/NDK are build prerequisites, not repository assets.
 
 Release tooling includes dependency metadata, a frontend CycloneDX SBOM, and npm license reports. Consult these for exact locked versions and transitive licenses. See `package-lock.json` and `Cargo.lock`. Generated system-library packaging and LGPL obligations must be reviewed before asserting broad portability or redistributing additional native libraries.
+
+`licenses/native-debian13` retains complete Debian copyright/license notices from the signed native-library packages used for the local Debian 13 build. These are also included as application resources. The Linuxdeploy packaging pass collects the matching installed-distribution notices on standard CI runners. Do not remove those notices when redistributing native libraries.
+
+`licenses/rust` retains the original license/notice files and package/license/repository metadata for the exact locked Rust dependency sources. `scripts/rust-licenses.py` refreshes this collection after dependency changes. `licenses/Gradle-LICENSE.txt` provides the upstream license for the retained Android Gradle wrapper. No proprietary signing material is included.

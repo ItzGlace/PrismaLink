@@ -16,3 +16,4 @@ src-tauri/gen/android/tauri.settings.gradle
 *.tsbuildinfo
 __pycache__/
 src-tauri/gen/android/app/src/main/assets/
+src-tauri/gen/android/**/.kotlin/
