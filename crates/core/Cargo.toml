@@ -1,0 +1,11 @@
+[package]
+name = "prismalink-core"
+version = "0.1.0-alpha.1"
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+ssh-key = { version = "0.6.7", features = ["ed25519", "rand_core"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+tokio = { version = "1", features = ["net", "time", "rt", "macros"] }
