@@ -516,7 +516,7 @@ export default function App() {
             Local-first
           </div>
         </section>
-        <div className="welcome-version">PrismaLink / 0.1.0-alpha.1</div>
+        <div className="welcome-version">PrismaLink / 0.1.0-alpha.2</div>
       </main>
     );
   return (
@@ -598,7 +598,7 @@ export default function App() {
             <span>↗</span>
           </button>
           <small className="build-label">
-            PRISMALINK <span>v0.1.0-alpha.1</span>
+            PRISMALINK <span>v0.1.0-alpha.2</span>
           </small>
         </div>
       </aside>
@@ -1099,7 +1099,7 @@ export default function App() {
               ))}
               <h2 className="section-space">About this alpha</h2>
               <p>
-                PrismaLink 0.1.0-alpha.1. Host library, encrypted vault,
+                PrismaLink 0.1.0-alpha.2. Host library, encrypted vault,
                 backups, native TCP diagnostics, and key generation. SSH
                 sessions, SFTP, remote desktop, and NFC are planned; protocol
                 labels organize hosts and do not imply connection support.

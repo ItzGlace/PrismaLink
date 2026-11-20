@@ -29,3 +29,9 @@ Windows installer generation/install/launch/uninstall has not run here. The work
 No release tag or GitHub release has been published or verified. Git read access works; `api.github.com` requests are denied by the managed network. Network additions for `api.github.com` and `uploads.github.com` were saved to the environment draft, together with reusable install/start instructions; saving does not apply or publish them. Apply the environment settings before inspecting Actions permissions/signing requirements and completing release publication.
 
 The alpha intentionally does not implement SSH/SFTP/VNC/RDP/NFC protocol engines. Their unavailable pages explain that status. Host labels and TCP reachability are not protocol sessions.
+
+## Tag-triggered CI follow-up
+
+The checks job and Linux desktop job for `v0.1.0-alpha.1` passed in GitHub Actions run 44746879171. Linux installation, actual native WebKit render, demo navigation and uninstall passed on Ubuntu 24.04; the cloud sysroot limitation does not reproduce on that runner. Windows generated its installer but failed the combined native verification step. Android SDK setup exited 127 before building. Publication was skipped.
+
+The next attempt, `v0.1.0-alpha.2`, uses an explicit SDK manager path, dynamic NDK location, early signing-secret presence checks, and a Windows PowerShell native verification script with explicit installation location, render readiness polling and failure annotations. These fixes preserve the required install/render/uninstall and signing gates. Native results for this new tag must be verified before claiming publication.
