@@ -1,0 +1,9 @@
+{
+  "source_commit": "55da920a9b137e1138265e1b26be284cc5fe087d",
+  "version": "0.1.0-alpha.4",
+  "sha256": "a914284ed5070219b3224011df8665b8abd31d9b3e0244b5f3e2c11b70e1e2fe",
+  "bytes": 22084913,
+  "android_certificate_sha256": "8C663EBFC24B319EF0DDE6C523733997E1640F1896BBFE6FB34F1816A3532D8D",
+  "private_signing_material_included": false,
+  "native_run_id": 44760375877
+}
