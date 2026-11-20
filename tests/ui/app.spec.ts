@@ -256,3 +256,15 @@ test("corrupted vault and preferences never crash or offer to overwrite saved da
     page.getByRole("button", { name: "Production gateway", exact: true }),
   ).toBeVisible();
 });
+test("switching pages after scrolling starts the new page at its heading", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1024, height: 650 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Explore demo workspace" }).click();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Make it feel like you." }),
+  ).toBeInViewport();
+});

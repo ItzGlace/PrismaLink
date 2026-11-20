@@ -33,12 +33,22 @@ def tree():
     return ET.fromstring(adb('shell', 'cat', '/sdcard/prismalink-ui.xml'))
 
 
+def visible(node):
+    values = list(map(int, re.findall(r'-?\d+', node.get('bounds',''))))
+    if len(values) != 4:
+        return False
+    x1,y1,x2,y2 = values
+    if x1 < 0 or y1 < 0 or x2 <= x1 or y2 <= y1:
+        return False
+    return node.get('clickable') != 'true' or y2-y1 >= 24
+
+
 def wait_for(text, scroll=False):
     deadline = time.monotonic() + 60
     while time.monotonic() < deadline:
         root = tree()
         for node in root.iter('node'):
-            if text in node.get('text', '') or text in node.get('content-desc', ''):
+            if visible(node) and (text in node.get('text', '') or text in node.get('content-desc', '')):
                 return node
         if scroll:
             size = adb('shell','wm','size')
@@ -49,12 +59,20 @@ def wait_for(text, scroll=False):
 
 
 def tap(node):
+    assert visible(node), 'Refusing to tap an offscreen Android control'
     x1,y1,x2,y2 = map(int, re.findall(r'\d+', node.attrib['bounds']))
     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
 
 
 def type_passwords(expected_fields):
-    fields=[n for n in tree().iter('node') if n.get('password')=='true']
+    fields=[]
+    for _ in range(6):
+        fields=[n for n in tree().iter('node') if n.get('password')=='true' and visible(n)]
+        if fields:
+            break
+        size=adb('shell','wm','size')
+        width,height=map(int,re.findall(r'(\d+)x(\d+)',size)[-1])
+        adb('shell','input','swipe',str(width//2),str(height*4//5),str(width//2),str(height//3),'350')
     assert fields, 'No accessible password field'
     tap(fields[0])
     adb('shell','input','text',PASSWORD)

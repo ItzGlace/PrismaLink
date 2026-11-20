@@ -227,6 +227,9 @@ export default function App() {
   } | null>(null);
   const notify = (s: string) => setNotice(s);
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page, Boolean(data)]);
+  useEffect(() => {
     if (!notice) return;
     const t = setTimeout(() => setNotice(""), 5000);
     return () => clearTimeout(t);
@@ -516,7 +519,7 @@ export default function App() {
             Local-first
           </div>
         </section>
-        <div className="welcome-version">PrismaLink / 0.1.0-alpha.4</div>
+        <div className="welcome-version">PrismaLink / 0.1.0-alpha.5</div>
       </main>
     );
   return (
@@ -598,7 +601,7 @@ export default function App() {
             <span>↗</span>
           </button>
           <small className="build-label">
-            PRISMALINK <span>v0.1.0-alpha.4</span>
+            PRISMALINK <span>v0.1.0-alpha.5</span>
           </small>
         </div>
       </aside>
@@ -1099,7 +1102,7 @@ export default function App() {
               ))}
               <h2 className="section-space">About this alpha</h2>
               <p>
-                PrismaLink 0.1.0-alpha.4. Host library, encrypted vault,
+                PrismaLink 0.1.0-alpha.5. Host library, encrypted vault,
                 backups, native TCP diagnostics, and key generation. SSH
                 sessions, SFTP, remote desktop, and NFC are planned; protocol
                 labels organize hosts and do not imply connection support.
