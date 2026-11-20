@@ -1,0 +1,153 @@
+name: Publish owner-signed prerelease
+on:
+  push:
+    branches: ["release/publish-v0.1.0-alpha.3"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: publish-v0.1.0-alpha.3
+  cancel-in-progress: false
+env:
+  RELEASE_TAG: v0.1.0-alpha.3
+  ANDROID_ARTIFACT_BRANCH: release-artifacts/android-v0.1.0-alpha.3
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    environment: release
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: v0.1.0-alpha.3
+          fetch-depth: 0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with: { node-version: "24", cache: npm }
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with: { distribution: temurin, java-version: "21" }
+      - name: Retrieve public signed APK and provenance
+        run: |
+          set -eu
+          test "v$(node -p 'JSON.parse(require("fs").readFileSync("package.json")).version')" = "$RELEASE_TAG"
+          git fetch origin "$ANDROID_ARTIFACT_BRANCH"
+          mkdir -p release
+          git show FETCH_HEAD:PrismaLink-universal.apk > release/PrismaLink-universal.apk
+          git show FETCH_HEAD:provenance.json > release/android-provenance.json
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'build-tools;37.0.0'
+      - name: Verify owner identity, source, ABI and package integrity
+        run: python3 scripts/verify-android-artifact.py release/PrismaLink-universal.apk release/android-provenance.json
+      - name: Require native desktop and source checks
+        id: native
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/await-native-artifacts.py release/android-provenance.json release/native-verification.json
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: desktop-Linux
+          run-id: ${{ steps.native.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: native-linux
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: desktop-Windows
+          run-id: ${{ steps.native.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: native-windows
+      - name: Verify all native assets
+        run: |
+          find native-linux native-windows -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.exe' \) -exec cp '{}' release/ \;
+          python3 scripts/check-assets.py release
+      - name: Enable emulator acceleration
+        run: |
+          test -e /dev/kvm || { echo '::error::A KVM-capable runner is required for Android validation'; exit 1; }
+          sudo chmod 666 /dev/kvm
+      - uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808 # v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: |
+            adb install -r release/PrismaLink-universal.apk
+            python3 scripts/smoke-android.py
+            adb uninstall com.prismalink.app
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with:
+          name: android-failure-diagnostics
+          path: release/android-failure.*
+          if-no-files-found: ignore
+      - name: Record verified native test coverage
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          Path('release/android-verification.json').write_text(json.dumps({'installed':True,'vault_create':True,'persistent_restart':True,'vault_unlock':True,'uninstalled':True,'emulator':'Android API 35 Google APIs x86_64'},indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: verified-release
+          path: release/*
+          if-no-files-found: error
+  publish:
+    needs: verify
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: v0.1.0-alpha.3
+          fetch-depth: 0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with: { node-version: "24", cache: npm }
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: verified-release
+          path: release
+      - name: Prepare exact-tag source, checksums, SBOM and release notes
+        run: |
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "$RELEASE_TAG^{commit}")"
+          python3 scripts/check-assets.py release
+          git archive --format=tar.gz --prefix=PrismaLink/ -o "release/PrismaLink-${RELEASE_TAG}-source.tar.gz" "$RELEASE_TAG"
+          npm ci
+          npm sbom --omit=dev --sbom-format cyclonedx > release/frontend-sbom.cdx.json
+          cargo metadata --locked --format-version 1 > release/rust-dependencies.json
+          node scripts/licenses.mjs > release/frontend-licenses.json
+          tar -czf release/dependency-license-notices.tar.gz licenses THIRD_PARTY_NOTICES.md
+          cp docs/RELEASE_NOTES.md release/RELEASE_NOTES.md
+          cat >> release/RELEASE_NOTES.md <<'NOTES'
+
+          Verified for this release:
+          - Source checks and browser vault, persistence, backup, responsive-layout and accessibility tests passed.
+          - Ubuntu 24.04 x64: native packages built; Debian install, actual WebKit render, demo navigation and uninstall passed.
+          - Windows Server 2022 x64 runner: unsigned NSIS install, actual WebView render and uninstall passed. Windows 10/11 hardware was not tested.
+          - Android API 35 Google APIs x86_64 emulator: production-signed universal APK installed; vault creation, persistent restart and unlock passed; uninstall passed.
+          - Android minimum API 24; included ABIs arm64-v8a, armeabi-v7a and x86_64. Native ELF and ZIP library alignment verified for 16 KiB pages; physical 16 KiB-page hardware was not tested.
+          - Signed using the owner's supplied production identity locally. No private key or password is stored in Git or release assets. The separate artifact branch holds only the signed APK and public provenance.
+
+          Known limits: SSH/SFTP/VNC/RDP/NFC protocol engines remain deferred. Windows installer is unsigned. Fedora/AlmaLinux RPM installation and other distributions remain untested. No 60 fps performance claim or independent security audit is made.
+          NOTES
+          python3 scripts/release-manifest.py release
+      - name: Publish prerelease and verify every downloaded asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$RELEASE_TAG" release/* --verify-tag --prerelease --title "PrismaLink $RELEASE_TAG · Alpha" --notes-file release/RELEASE_NOTES.md
+          gh release view "$RELEASE_TAG" --json url,assets,tagName,targetCommitish > release/verified-release.json
+          mkdir -p verified-downloads
+          gh release download "$RELEASE_TAG" --dir verified-downloads
+          (cd verified-downloads && sha256sum -c SHA256SUMS)
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          actual=json.loads(Path('release/verified-release.json').read_text())
+          expected=json.loads(Path('release/provenance.json').read_text())
+          files={a['name']:a for a in actual['assets']}
+          for asset in expected['assets']:
+              assert files[asset['name']]['size']==asset['bytes'], asset['name']
+          print(actual['url'])
+          PY
