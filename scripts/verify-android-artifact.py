@@ -21,8 +21,8 @@ assert provenance['sha256'] == hashlib.sha256(apk.read_bytes()).hexdigest(), 'AP
 assert provenance['bytes'] == apk.stat().st_size, 'APK size mismatch'
 sdk = Path(os.environ['ANDROID_HOME']) / 'build-tools' / '37.0.0'
 verified = subprocess.run([str(sdk / 'apksigner'), 'verify', '--verbose', '--print-certs', str(apk)], capture_output=True, text=True, check=True)
-certs = re.findall(r'Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]+)', verified.stdout)
-assert len(certs) == 1 and certs[0].upper() == expected_cert, 'Signing identity mismatch'
+certs = {value.upper() for value in re.findall(r'certificate SHA-256 digest: ([0-9a-fA-F]+)', verified.stdout)}
+assert certs == {expected_cert}, 'Signing identity mismatch'
 subprocess.run([str(sdk / 'zipalign'), '-c', '-P', '16', '4', str(apk)], capture_output=True, check=True)
 badging = subprocess.check_output([str(sdk / 'aapt'), 'dump', 'badging', str(apk)], text=True)
 assert "name='com.prismalink.app'" in badging

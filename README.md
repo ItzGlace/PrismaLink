@@ -2,7 +2,7 @@
 
 An original, local-first connection workspace built with **Tauri 2, Rust, React, and TypeScript** for Android, Windows, and Linux. Charcoal surfaces, restrained violet glass, and lime highlights share one design system. “iOS 27 / iPhone 27” is an aesthetic reference, not a platform dependency.
 
-**Status: 0.1.0-alpha.3 — incomplete but usable host manager and encrypted vault.** This is not yet a remote-access client. No published release is implied by this repository or workflow.
+**Status: 0.1.0-alpha.4 — incomplete but usable host manager and encrypted vault.** This is not yet a remote-access client. No published release is implied by this repository or workflow.
 
 ## What works
 

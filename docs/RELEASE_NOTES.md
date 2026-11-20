@@ -1,4 +1,4 @@
-# PrismaLink 0.1.0-alpha.3
+# PrismaLink 0.1.0-alpha.4
 
 An early, incomplete but usable local host library and encrypted credential vault, with an original charcoal/violet/lime glass interface.
 

@@ -1,17 +1,17 @@
 name: Publish owner-signed prerelease
 on:
   push:
-    branches: ["release/publish-v0.1.0-alpha.3"]
+    branches: ["release/publish-v0.1.0-alpha.4"]
   workflow_dispatch:
 permissions:
   contents: read
   actions: read
 concurrency:
-  group: publish-v0.1.0-alpha.3
+  group: publish-v0.1.0-alpha.4
   cancel-in-progress: false
 env:
-  RELEASE_TAG: v0.1.0-alpha.3
-  ANDROID_ARTIFACT_BRANCH: release-artifacts/android-v0.1.0-alpha.3
+  RELEASE_TAG: v0.1.0-alpha.4
+  ANDROID_ARTIFACT_BRANCH: release-artifacts/android-v0.1.0-alpha.4
 jobs:
   verify:
     runs-on: ubuntu-24.04
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          ref: v0.1.0-alpha.3
+          ref: v0.1.0-alpha.4
           fetch-depth: 0
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with: { node-version: "24", cache: npm }
@@ -100,7 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          ref: v0.1.0-alpha.3
+          ref: v0.1.0-alpha.4
           fetch-depth: 0
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with: { node-version: "24", cache: npm }
